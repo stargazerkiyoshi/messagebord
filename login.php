@@ -66,6 +66,7 @@ if(!empty($_SESSION['username'])){
 				</div>
 				<div class="load">
 					<input type="submit" value="登录"/>
+					<a href="register.php">注册</a>
 				</div>
 			</form>
 		</div>

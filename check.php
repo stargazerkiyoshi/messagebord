@@ -21,6 +21,6 @@ if($one){
 	}
 }else{
 //	echo "登录失败";
-	echo "<script>alert('登录失败');window.location.href='load.php'</script>";
+	echo "<script>alert('登录失败');window.location.href='login.php'</script>";
 }
 ?>
