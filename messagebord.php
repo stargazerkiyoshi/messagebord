@@ -7,10 +7,21 @@ if(empty($_SESSION['username'])){
 	header("Location:login.html");
 }
 
+
 //获取留言的详细数据
 //连接数据库
 $link=mysqli_connect("localhost", "root", "root", "message", 3306);
-$sql="SELECT m.id,m.uid,m.addtime,u.username,m.content FROM message AS m JOIN users AS u ON m.uid=u.id ORDER BY m.addtime DESC";
+
+$everyPage=5;
+//获取数据的总条数
+$sql="SELECT COUNT(*) FROM message";
+$res=mysqli_query($link, $sql);
+$arr=mysqli_fetch_assoc($res);
+$totalCount=$arr['COUNT(*)'];
+//总页码数
+$page=ceil($totalCount/$everyPage);
+
+$sql="SELECT m.id,m.uid,m.addtime,u.username,m.content FROM message AS m JOIN users AS u ON m.uid=u.id ORDER BY m.addtime DESC LIMIT 0,{$everyPage}";
 
 $res=mysqli_query($link, $sql);
 $list=mysqli_fetch_all($res,MYSQL_ASSOC);
@@ -75,10 +86,15 @@ foreach($list as $k=>$v){
 			</table>
 			<?php
 				if($v['uid']==$_SESSION['uid']){
-					echo "<button onclick='_delete({$v["id"]})'>删除</button>";
+					echo "<p><button onclick='_delete({$v["id"]})'>删除</button></p>";
 				}
 			?>
 			<?php }?>
+			<?php 
+				for($i=1;$i<=$page;$i++){
+					echo "<span onclick='getPageData({$i})'>&nbsp;{$i}&nbsp;</span>";
+				}
+			?>
 			</div>
 		</div>	
 		<script type="text/javascript">
@@ -128,17 +144,24 @@ foreach($list as $k=>$v){
 			}
 			function getData(){
 				$.ajax({
-							type:"get",
-							url:"getData.php",
-							async:true,
-							dataType:"json",
-							success:function(res){
-								console.log(res);
-								var uid = <?php echo $_SESSION['uid'] ?>
-								//组装html
-								var str="";
-								for(var i=0;i<res.length;i++){
-									str+=`<table border="1">
+					type:"get",
+					url:"getData.php",
+					async:true,
+					dataType:"json",
+					success:function(res){
+						console.log(res);
+						getHtml(res);
+					}
+				})
+			}
+			
+			
+			function getHtml(res){
+				var uid = <?php echo $_SESSION['uid'] ?>
+				//组装html
+				var str="";
+				for(var i=0;i<res.length;i++){
+					str+=`<table border="1">
 				<tr>
 					<td>用户名：</td><td>${res[i].username}</td>
 				</tr>
@@ -149,13 +172,43 @@ foreach($list as $k=>$v){
 					<td>发布时间：</td><td>${res[i].showtime}</td>
 				</tr>	
 			</table>
-			${uid==res[i].uid?'<button onclick="_delete('+res[i].id+')">删除</button>':''}`
-								console.log(str);
-								//最新的dom替换旧的dom结构
-								$('#exchange').html(str);
-								}
-							}
-						})
+			${uid==res[i].uid?'<p><button onclick="_delete('+res[i].id+')">删除</button><p>':''}`;
+				
+//					//组装分页
+//					var pHtml="";
+//					var page=<?php echo $page;?>;
+//					for(var i=1;i<=page;i++){
+//						pHtml += `<span onclick='getPageData(${i})'>&nbsp;${i}&nbsp;</span>`;
+//					}
+//组装分页结构
+			     	var pHtml = "";
+			     	var page = <?php echo $page; ?>;
+			     	for(var i=1;i<=page;i++){
+			     		pHtml += `<span onclick='getPageData(${i})'>&nbsp;${i}&nbsp;</span>`;
+			     		
+			     	}
+//					console.log(pHtml);
+//					//最新的dom替换旧的dom结构
+					$('#exchange').html(str+pHtml);
+				}
+			}
+			//获取分页的数据；
+			function getPageData(p){
+				console.log(p);
+				$.ajax({
+					type:"get",
+					url:"getPageData.php",
+					async:true,
+					dataType:"json",
+					data:{
+						p:p,
+						everyPage:<?php echo $everyPage?>
+					},
+					success:function(res){
+						console.log(res);
+						getHtml(res);
+					}
+				});
 			}
 		</script>
 	</body>
