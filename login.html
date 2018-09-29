@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">body,
+h2 {
+	margin: 0;
+	padding: 0;
+}
+
+.loadbox {
+	width: 400px;
+	height: 500px;
+	border: 1px solid;
+	margin: 100px auto;
+}
+
+.loadbox>h2 {
+	margin-top: 10px;
+	text-align: center;
+}
+
+.myinput {
+	height: 30px;
+	margin: 30px;
+	margin-top: 50px;
+}
+
+.myinput>label {
+	margin-left: 20px;
+	width: 70px;
+	text-align: right;
+	display: inline-block;
+}
+
+.member {
+	height: 20px;
+	margin: 30px;
+}
+
+.member {
+	text-align: center;
+}
+
+.load {
+	text-align: center;
+}</style>
+		<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+	</head>
+	<body>
+		<div class="loadbox">
+			<h2>留言板登录</h2>
+			<form action="checkUser.php" method="post">
+				<div class="myinput">
+					<label for="username">用户名：</label>
+					<input  type="text" name="username" id="username"/>
+					<span class="exchange">
+						
+					</span>
+				</div>
+
+				<div class="myinput">
+					<label for="pwd">密码：</label>
+					<input type="password" name="pwd" id="pwd"/>
+				</div>
+				<div class="member">
+					<input type="checkbox" name="member"/>
+					记住我
+				</div>
+				<div class="load">
+					<input type="submit" value="登录"/>
+					<a href="register.php">
+						注册
+					</a>
+				</div>
+			</form>
+		</div>
+	</body>
+	<script type="text/javascript">var username = document.getElementById('username');
+username.onblur = checkUserName;
+
+function checkUserName() {
+	//获取用户名
+	var username = $("#username").val();
+
+	$.ajax({
+		type: "get",
+		url: "checkUser.php",
+		async: true,
+		dataType: "json",
+		data:{
+			username
+		},
+		success: function(res) {
+			console.log(res);
+			if(res.status == 1) {
+				$(".exchange").html("<span style='color:green'>" + res.info + "</span>")
+			}else{
+				$(".exchange").html("<span style='color:red'>" + res.info + "</span>")
+			}
+			
+		}
+	});
+}</script>
+
+</html>
